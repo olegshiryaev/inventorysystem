@@ -1,0 +1,6 @@
+<h1>Equipment List</h1>
+<ul>
+    {% for equipment in equipments %}
+        <li><a href="{% url 'inventory:equipment_detail' pk=equipment.pk %}">{{ equipment.serial_number }} - {{ equipment.model }}</a></li>
+    {% endfor %}
+</ul>

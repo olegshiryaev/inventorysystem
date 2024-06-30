@@ -1,0 +1,59 @@
+# Python
+*.py[cod]
+__pycache__/
+*.so
+*.egg
+*.egg-info/
+.eggs
+*.log
+
+# Virtual environments
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Django
+*.log
+*.pot
+*.pyc
+*.pyo
+__pycache__/
+db.sqlite3
+staticfiles/
+media/
+**/migrations/
+!**/migrations/__init__.py
+
+# VS Code
+.vscode/
+
+# PyCharm
+.idea/
+
+# Others
+*.swp
+*~
+.DS_Store
+*.bak
+*.backup
+*.tmp
+*.temp
+node_modules/
+dist/
+build/
+*.sql
+*.sqlite3
+*.sqlite
+*.bak
+*.backup
+*.db
+*.db3
+*.dump
+*.p12
+*.p8
+*.key
+*.pem
+*.cert
