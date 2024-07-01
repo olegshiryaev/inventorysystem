@@ -5,8 +5,10 @@ from . import views
 app_name = 'inventory'
 
 urlpatterns = [
-    path('', views.equipment_list, name='equipment_list'),
+    path('equipment/', views.equipment_list, name='equipment_list'),
     path('equipment/<int:pk>/', views.equipment_detail, name='equipment_detail'),
+    path('scan/', views.scan_barcode, name='scan_barcode'),
+    path('search/', views.search_equipment, name='search_equipment'),
     path('equipment/new/', views.equipment_new, name='equipment_new'),
     path('equipment/<int:pk>/edit/', views.equipment_edit, name='equipment_edit'),
     path('equipment_model/', views.equipment_model_list, name='equipment_model_list'),

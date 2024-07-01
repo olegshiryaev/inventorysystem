@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Оборудование не найдено</title>
+</head>
+<body>
+    <h1>Оборудование не найдено</h1>
+    <p>Серийный номер: {{ serial_number }}</p>
+    <a href="{% url 'inventory:scan_barcode' %}">Попробовать снова</a>
+</body>
+</html>

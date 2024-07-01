@@ -10,6 +10,19 @@ def equipment_detail(request, pk):
     equipment = get_object_or_404(Equipment, pk=pk)
     return render(request, 'inventory/equipment_detail.html', {'equipment': equipment})
 
+def scan_barcode(request):
+    return render(request, 'inventory/barcode_scanner.html')
+
+def search_equipment(request):
+    serial_number = request.GET.get('serial_number')
+    if serial_number:
+        try:
+            equipment = Equipment.objects.get(serial_number=serial_number)
+            return redirect('inventory:equipment_detail', pk=equipment.pk)
+        except Equipment.DoesNotExist:
+            return render(request, 'inventory/equipment_not_found.html', {'serial_number': serial_number})
+    return redirect('inventory:scan_barcode')
+
 def equipment_new(request):
     if request.method == "POST":
         form = EquipmentForm(request.POST)

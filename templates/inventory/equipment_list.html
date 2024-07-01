@@ -1,6 +1,17 @@
-<h1>Equipment List</h1>
-<ul>
-    {% for equipment in equipments %}
-        <li><a href="{% url 'inventory:equipment_detail' pk=equipment.pk %}">{{ equipment.serial_number }} - {{ equipment.model }}</a></li>
-    {% endfor %}
-</ul>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Список оборудования</title>
+</head>
+<body>
+    <h1>Список оборудования</h1>
+    <ul>
+        {% for equipment in equipments %}
+            <li><a href="{% url 'inventory:equipment_detail' pk=equipment.pk %}">{{ equipment.serial_number }} - {{ equipment.model }}</a></li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'inventory:scan_barcode' %}">Сканировать штрихкод</a>
+</body>
+</html>

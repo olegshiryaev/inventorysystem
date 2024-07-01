@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сканер штрихкода</title>
+</head>
+<body>
+    <h1>Сканер штрихкода</h1>
+    <video id="video" width="300" height="200" style="border: 1px solid gray"></video>
+    <form id="search-form" action="{% url 'inventory:search_equipment' %}" method="get">
+        <input type="hidden" name="serial_number" id="serial_number">
+    </form>
+    <script src="https://unpkg.com/@zxing/library@latest"></script>
+    <script>
+        const codeReader = new ZXing.BrowserMultiFormatReader();
+        codeReader.decodeFromVideoDevice(null, 'video', (result, err) => {
+            if (result) {
+                document.getElementById('serial_number').value = result.text;
+                document.getElementById('search-form').submit();
+                codeReader.reset();
+            }
+            if (err && !(err instanceof ZXing.NotFoundException)) {
+                console.error(err);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -4,7 +4,7 @@ from .models import Equipment, EquipmentModel
 class EquipmentModelForm(forms.ModelForm):
     class Meta:
         model = EquipmentModel
-        fields = ['manufacturer', 'model', 'category']
+        fields = ['manufacturer', 'model', 'type']
 
 class EquipmentForm(forms.ModelForm):
     class Meta:
