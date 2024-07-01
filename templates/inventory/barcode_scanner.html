@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Сканер штрихкода</title>
+    <title>Сканер штрихкода с QuaggaJS</title>
     <style>
-        video {
+        #interactive {
             width: 100%;
             height: auto;
             border: 1px solid gray;
@@ -13,45 +13,48 @@
     </style>
 </head>
 <body>
-    <h1>Сканер штрихкода</h1>
-    <video id="video" autoplay playsinline></video>
-    <form id="search-form" action="{% url 'inventory:search_equipment' %}" method="get">
-        <input type="hidden" name="serial_number" id="serial_number">
-    </form>
-    <script src="https://unpkg.com/@zxing/library@latest"></script>
+    <h1>Сканер штрихкода с QuaggaJS</h1>
+    <div id="interactive"></div>
+    <script src="https://cdn.jsdelivr.net/npm/quagga/dist/quagga.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const codeReader = new ZXing.BrowserMultiFormatReader();
-            
-            navigator.mediaDevices.getUserMedia({
-                video: {
-                    facingMode: "environment",
-                    width: { ideal: 1280 },
-                    height: { ideal: 720 },
-                    focusMode: "continuous"
+            Quagga.init({
+                inputStream: {
+                    name: "Live",
+                    type: "LiveStream",
+                    target: document.getElementById('interactive'),
+                    constraints: {
+                        width: { min: 640 },
+                        height: { min: 480 },
+                        facingMode: "environment" // Использовать заднюю камеру
+                    }
+                },
+                locator: {
+                    patchSize: "medium",
+                    halfSample: true
+                },
+                numOfWorkers: 2,
+                decoder: {
+                    readers: ["ean_reader"] // Распознавание EAN штрихкодов
+                },
+                locate: true
+            }, function(err) {
+                if (err) {
+                    console.error('Ошибка инициализации Quagga:', err);
+                    return;
                 }
-            }).then(stream => {
-                const videoElement = document.getElementById('video');
-                videoElement.srcObject = stream;
-                videoElement.play();
+                Quagga.start();
+            });
 
-                codeReader.decodeFromVideoDevice(null, 'video', (result, err) => {
-                    if (result) {
-                        console.log(result);
-                        document.getElementById('serial_number').value = result.text;
-                        document.getElementById('search-form').submit();
-                        codeReader.reset();
-                    }
-                    if (err && !(err instanceof ZXing.NotFoundException)) {
-                        console.error(err);
-                    }
-                }).catch((err) => {
-                    console.error('Error initializing video stream:', err);
-                });
-            }).catch(err => {
-                console.error('Error accessing user media:', err);
+            Quagga.onDetected(function(result) {
+                console.log('Результат сканирования:', result);
+                document.getElementById('serial_number').value = result.codeResult.code;
+                document.getElementById('search-form').submit();
             });
         });
     </script>
+    <form id="search-form" action="{% url 'inventory:search_equipment' %}" method="get">
+        <input type="hidden" name="serial_number" id="serial_number">
+    </form>
 </body>
 </html>

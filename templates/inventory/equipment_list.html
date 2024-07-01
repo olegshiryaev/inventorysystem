@@ -1,17 +1,50 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Список оборудования</title>
-</head>
-<body>
-    <h1>Список оборудования</h1>
-    <ul>
-        {% for equipment in equipments %}
-            <li><a href="{% url 'inventory:equipment_detail' pk=equipment.pk %}">{{ equipment.serial_number }} - {{ equipment.model }}</a></li>
-        {% endfor %}
-    </ul>
-    <a href="{% url 'inventory:scan_barcode' %}">Сканировать штрихкод</a>
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block title %}
+    Список оборудования
+{% endblock %}
+
+{% block content %}
+    <h1 class="my-4">Список оборудования</h1>
+    <a href="{% url 'inventory:equipment_create' %}" class="btn btn-success mb-3">Создать новое оборудование</a>
+    <table id="equipmentTable" class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>Серийный номер</th>
+                <th>Модель</th>
+                <th>Инвентарный номер</th>
+                <th>Номенклатурный номер</th>
+                <th>Код</th>
+                <th>Состояние</th>
+                <th>Дата покупки</th>
+                <th>Дата окончания гарантии</th>
+                <th>Ответственное лицо</th>
+                <th>Склад</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for equipment in equipments %}
+                <tr>
+                    <td><a href="{% url 'inventory:equipment_detail' pk=equipment.pk %}">{{ equipment.serial_number }}</a></td>
+                    <td>{{ equipment.model }}</td>
+                    <td>{{ equipment.inventory_number }}</td>
+                    <td>{{ equipment.nomenclature_number }}</td>
+                    <td>{{ equipment.code }}</td>
+                    <td>{{ equipment.get_status_display }}</td>
+                    <td>{{ equipment.purchase_date }}</td>
+                    <td>{{ equipment.warranty_expiry_date }}</td>
+                    <td>{{ equipment.person_in_charge }}</td>
+                    <td>{{ equipment.warehouse }}</td>
+                    <td>
+                        <a href="{% url 'inventory:equipment_edit' pk=equipment.pk %}" class="btn btn-sm btn-warning">Редактировать</a>
+                        <form action="{% url 'inventory:equipment_delete' pk=equipment.pk %}" method="post" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-danger">Удалить</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

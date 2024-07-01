@@ -1,14 +1,8 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Equipment, EquipmentModel
+from .models import Equipment, EquipmentModel, SystemUnit, Monitor
 from .forms import EquipmentForm, EquipmentModelForm
-
-def equipment_list(request):
-    equipments = Equipment.objects.all()
-    return render(request, 'inventory/equipment_list.html', {'equipments': equipments})
-
-def equipment_detail(request, pk):
-    equipment = get_object_or_404(Equipment, pk=pk)
-    return render(request, 'inventory/equipment_detail.html', {'equipment': equipment})
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 
 def scan_barcode(request):
     return render(request, 'inventory/barcode_scanner.html')
@@ -23,26 +17,47 @@ def search_equipment(request):
             return render(request, 'inventory/equipment_not_found.html', {'serial_number': serial_number})
     return redirect('inventory:scan_barcode')
 
-def equipment_new(request):
+
+@login_required
+def equipment_list(request):
+    system_units = SystemUnit.objects.all()
+    monitors = Monitor.objects.all()
+    return render(request, 'inventory/equipment_list.html', {'system_units': system_units, 'monitors': monitors})
+
+@login_required
+def equipment_detail(request, pk):
+    equipment = get_object_or_404(Equipment, pk=pk)
+    return render(request, 'inventory/equipment_detail.html', {'equipment': equipment})
+
+@login_required
+def equipment_create(request):
     if request.method == "POST":
         form = EquipmentForm(request.POST)
         if form.is_valid():
             equipment = form.save()
-            return redirect('equipment_detail', pk=equipment.pk)
+            return redirect('inventory:equipment_detail', pk=equipment.pk)
     else:
         form = EquipmentForm()
-    return render(request, 'inventory/equipment_edit.html', {'form': form})
+    return render(request, 'inventory/equipment_form.html', {'form': form, 'title': 'Создать оборудование'})
 
+@login_required
 def equipment_edit(request, pk):
     equipment = get_object_or_404(Equipment, pk=pk)
     if request.method == "POST":
         form = EquipmentForm(request.POST, instance=equipment)
         if form.is_valid():
             equipment = form.save()
-            return redirect('equipment_detail', pk=equipment.pk)
+            return redirect('inventory:equipment_detail', pk=equipment.pk)
     else:
         form = EquipmentForm(instance=equipment)
-    return render(request, 'inventory/equipment_edit.html', {'form': form})
+    return render(request, 'inventory/equipment_form.html', {'form': form, 'title': 'Редактировать оборудование'})
+
+@login_required
+@require_POST
+def equipment_delete(request, pk):
+    equipment = get_object_or_404(Equipment, pk=pk)
+    equipment.delete()
+    return redirect('inventory:equipment_list')
 
 def equipment_model_list(request):
     models = EquipmentModel.objects.all()

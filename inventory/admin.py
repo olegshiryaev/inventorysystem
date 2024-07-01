@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import EquipmentType, EquipmentModel, Equipment, Manufacturer, PersonInCharge, Warehouse
+from .models import EquipmentType, EquipmentModel, Manufacturer, PersonInCharge, Warehouse, SystemUnit, Monitor
 
 @admin.register(EquipmentType)
 class EquipmentTypeAdmin(admin.ModelAdmin):
@@ -13,9 +13,9 @@ class ManufacturerAdmin(admin.ModelAdmin):
 
 @admin.register(EquipmentModel)
 class EquipmentModelAdmin(admin.ModelAdmin):
-    list_display = ('id', 'manufacturer', 'model', 'type', 'created_at', 'updated_at')
+    list_display = ('id', 'manufacturer', 'model', 'type', 'nomenclature_number', 'created_at', 'updated_at')
     list_filter = ('type', 'manufacturer')
-    search_fields = ('model', 'manufacturer__name', 'type__name')
+    search_fields = ('model', 'manufacturer__name', 'type__name', 'nomenclature_number')
     date_hierarchy = 'created_at'
 
 @admin.register(PersonInCharge)
@@ -28,8 +28,14 @@ class WarehouseAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'location')
     search_fields = ('name', 'location')
 
-@admin.register(Equipment)
-class EquipmentAdmin(admin.ModelAdmin):
-    list_display = ('id', 'model', 'serial_number', 'inventory_number', 'nomenclature_number', 'code', 'status', 'person_in_charge', 'warehouse', 'purchase_date', 'warranty_expiry_date')
-    list_filter = ('model', 'person_in_charge', 'warehouse', 'status', 'purchase_date', 'warranty_expiry_date')
-    search_fields = ('serial_number', 'inventory_number', 'nomenclature_number', 'code', 'model')
+@admin.register(SystemUnit)
+class SystemUnitAdmin(admin.ModelAdmin):
+    list_display = ('model', 'code', 'serial_number', 'person_in_charge', 'status')
+    list_filter = ('status', 'warehouse', 'person_in_charge')
+    search_fields = ('model__model', 'serial_number', 'code')
+
+@admin.register(Monitor)
+class MonitorAdmin(admin.ModelAdmin):
+    list_display = ('model', 'code', 'serial_number', 'person_in_charge', 'status')
+    list_filter = ('status', 'warehouse', 'person_in_charge')
+    search_fields = ('model__model', 'serial_number', 'code')

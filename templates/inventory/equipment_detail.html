@@ -1,21 +1,31 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Информация об оборудовании</title>
-</head>
-<body>
-    <h1>Информация об оборудовании</h1>
-    <p>Модель: {{ equipment.model }}</p>
-    <p>Серийный номер: {{ equipment.serial_number }}</p>
-    <p>Инвентарный номер: {{ equipment.inventory_number }}</p>
-    <p>Номенклатурный номер: {{ equipment.nomenclature_number }}</p>
-    <p>Код: {{ equipment.code }}</p>
-    <p>Состояние: {{ equipment.get_status_display }}</p>
-    <p>Дата покупки: {{ equipment.purchase_date }}</p>
-    <p>Дата окончания гарантии: {{ equipment.warranty_expiry_date }}</p>
-    <p>Ответственное лицо: {{ equipment.person_in_charge }}</p>
-    <p>Склад: {{ equipment.warehouse }}</p>
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block title %}
+    Информация об оборудовании
+{% endblock %}
+
+{% block content %}
+    <h1 class="my-4">Информация об оборудовании</h1>
+    <div class="card">
+        <div class="card-body">
+            <p><strong>Модель:</strong> {{ equipment.model }}</p>
+            <p><strong>Серийный номер:</strong> {{ equipment.serial_number }}</p>
+            <p><strong>Инвентарный номер:</strong> {{ equipment.inventory_number }}</p>
+            <p><strong>Номенклатурный номер:</strong> {{ equipment.nomenclature_number }}</p>
+            <p><strong>Код:</strong> {{ equipment.code }}</p>
+            <p><strong>Состояние:</strong> {{ equipment.get_status_display }}</p>
+            <p><strong>Дата покупки:</strong> {{ equipment.purchase_date }}</p>
+            <p><strong>Дата окончания гарантии:</strong> {{ equipment.warranty_expiry_date }}</p>
+            <p><strong>Ответственное лицо:</strong> {{ equipment.person_in_charge }}</p>
+            <p><strong>Склад:</strong> {{ equipment.warehouse }}</p>
+        </div>
+    </div>
+    <div class="mt-3">
+        <a href="{% url 'inventory:equipment_edit' pk=equipment.pk %}" class="btn btn-warning">Редактировать</a>
+        <form action="{% url 'inventory:equipment_delete' pk=equipment.pk %}" method="post" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Удалить</button>
+        </form>
+        <a href="{% url 'inventory:equipment_list' %}" class="btn btn-secondary">Назад к списку</a>
+    </div>
+{% endblock %}
