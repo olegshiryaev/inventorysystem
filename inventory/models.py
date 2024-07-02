@@ -2,14 +2,8 @@ from django.db import models
 
 
 class Warehouse(models.Model):
-    name = models.CharField(
-        max_length=100, 
-        verbose_name="Название склада"
-    )
-    location = models.CharField(
-        max_length=100, 
-        verbose_name="Адрес склада"
-    )
+    name = models.CharField(max_length=100, verbose_name="Название склада")
+    location = models.CharField(max_length=100, verbose_name="Адрес склада")
 
     def __str__(self):
         return self.name
@@ -21,8 +15,7 @@ class Warehouse(models.Model):
 
 class PersonInCharge(models.Model):
     name = models.CharField(
-        max_length=100, 
-        verbose_name="ФИО ответственного лица"
+        max_length=100, verbose_name="ФИО материально-ответственного лица"
     )
 
     def __str__(self):
@@ -38,7 +31,7 @@ class EquipmentType(models.Model):
 
     def __str__(self):
         return self.name
-    
+
     class Meta:
         verbose_name = "Тип оборудования"
         verbose_name_plural = "Типы оборудования"
@@ -49,55 +42,105 @@ class Manufacturer(models.Model):
 
     def __str__(self):
         return self.name
-    
+
     class Meta:
         verbose_name = "Производитель"
         verbose_name_plural = "Производители"
-    
+
 
 class EquipmentModel(models.Model):
-    type = models.ForeignKey(EquipmentType, on_delete=models.CASCADE, verbose_name="Тип оборудования")
-    manufacturer = models.ForeignKey(Manufacturer, on_delete=models.CASCADE, verbose_name="Производитель")
+    type = models.ForeignKey(
+        EquipmentType, on_delete=models.CASCADE, verbose_name="Тип оборудования"
+    )
+    manufacturer = models.ForeignKey(
+        Manufacturer, on_delete=models.CASCADE, verbose_name="Производитель"
+    )
     model = models.CharField(max_length=100, verbose_name="Модель оборудования")
-    nomenclature_number = models.CharField(max_length=100, blank=True, verbose_name="Номенклатурный номер")
+    nomenclature_number = models.CharField(
+        max_length=100, blank=True, verbose_name="Номенклатурный номер"
+    )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
 
     def __str__(self):
-        return f'{self.type.name} {self.manufacturer.name} {self.model}'
-    
+        return f"{self.type.name} {self.manufacturer.name} {self.model}"
+
     class Meta:
         verbose_name = "Модель оборудования"
         verbose_name_plural = "Модели оборудования"
 
 
+class Workstation(models.Model):
+    user = models.CharField(max_length=100, verbose_name="Имя пользователя")
+    location = models.CharField(max_length=100, verbose_name="Местоположение")
+
+    def __str__(self):
+        return self.user
+
+    class Meta:
+        verbose_name = "Рабочее место"
+        verbose_name_plural = "Рабочие места"
+
+
 class Equipment(models.Model):
     STATUS_CHOICES = [
-        ('working', 'Рабочее'),
-        ('needs_repair', 'Требует ремонта'),
-        ('in_repair', 'Ремонт'),
-        ('diagnostics', 'На диагностику'),
-        ('disposal', 'На утилизацию'),
-        ('disposed', 'Утилизировано'),
+        ("working", "Рабочее"),
+        ("needs_repair", "Требует ремонта"),
+        ("in_repair", "Ремонт"),
+        ("diagnostics", "На диагностику"),
+        ("disposal", "На утилизацию"),
+        ("disposed", "Утилизировано"),
     ]
-    model = models.ForeignKey(EquipmentModel, on_delete=models.CASCADE, verbose_name="Модель оборудования")
+    model = models.ForeignKey(
+        EquipmentModel, on_delete=models.CASCADE, verbose_name="Модель оборудования"
+    )
     code = models.CharField(max_length=100, verbose_name="Код")
-    serial_number = models.CharField(max_length=100, unique=True, verbose_name="Серийный номер")
-    inventory_number = models.CharField(max_length=100, blank=True, null=True, verbose_name="Инвентарный номер")
-    person_in_charge = models.ForeignKey(PersonInCharge, on_delete=models.CASCADE, verbose_name="МОЛ")
-    warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE, verbose_name="Склад")
-    purchase_date = models.DateField(verbose_name="Дата приобретения")
-    warranty_expiry_date = models.DateField(verbose_name="Дата окончания гарантии")
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='working', verbose_name="Состояние")
+    serial_number = models.CharField(
+        max_length=100, unique=True, verbose_name="Серийный номер"
+    )
+    inventory_number = models.CharField(
+        max_length=100, blank=True, null=True, verbose_name="Инвентарный номер"
+    )
+    person_in_charge = models.ForeignKey(
+        PersonInCharge, on_delete=models.CASCADE, verbose_name="МОЛ"
+    )
+    warehouse = models.ForeignKey(
+        Warehouse, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Склад"
+    )
+    workstation = models.ForeignKey(
+        Workstation,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        verbose_name="Рабочее место",
+    )
+    purchase_date = models.DateField(
+        null=True, blank=True, verbose_name="Дата приобретения"
+    )
+    warranty_expiry_date = models.DateField(
+        null=True, blank=True, verbose_name="Дата окончания гарантии"
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="working",
+        verbose_name="Состояние",
+    )
 
     class Meta:
         abstract = True
 
 
 class SystemUnit(Equipment):
-    cpu = models.CharField(max_length=100, verbose_name="Процессор")
-    ram = models.PositiveIntegerField(verbose_name="Оперативная память (ГБ)")
-    storage = models.PositiveIntegerField(verbose_name="Накопитель (ГБ)")
+    cpu = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name="Процессор"
+    )
+    ram = models.PositiveIntegerField(
+        null=True, blank=True, verbose_name="Оперативная память (ГБ)"
+    )
+    storage = models.PositiveIntegerField(
+        null=True, blank=True, verbose_name="Накопитель (ГБ)"
+    )
 
     class Meta:
         verbose_name = "Системный блок"
@@ -105,8 +148,12 @@ class SystemUnit(Equipment):
 
 
 class Monitor(Equipment):
-    resolution = models.CharField(max_length=100, verbose_name="Разрешение")
-    size = models.PositiveIntegerField(verbose_name="Диагональ (дюймы)")
+    resolution = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name="Разрешение"
+    )
+    size = models.PositiveIntegerField(
+        null=True, blank=True, verbose_name="Диагональ (дюймы)"
+    )
 
     class Meta:
         verbose_name = "Монитор"
