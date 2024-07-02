@@ -91,70 +91,20 @@ class Equipment(models.Model):
         ("disposal", "На утилизацию"),
         ("disposed", "Утилизировано"),
     ]
-    model = models.ForeignKey(
-        EquipmentModel, on_delete=models.CASCADE, verbose_name="Модель оборудования"
-    )
+    model = models.ForeignKey(EquipmentModel, on_delete=models.CASCADE, verbose_name="Модель оборудования")
     code = models.CharField(max_length=100, verbose_name="Код")
-    serial_number = models.CharField(
-        max_length=100, unique=True, verbose_name="Серийный номер"
-    )
-    inventory_number = models.CharField(
-        max_length=100, blank=True, null=True, verbose_name="Инвентарный номер"
-    )
-    person_in_charge = models.ForeignKey(
-        PersonInCharge, on_delete=models.CASCADE, verbose_name="МОЛ"
-    )
-    warehouse = models.ForeignKey(
-        Warehouse, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Склад"
-    )
-    workstation = models.ForeignKey(
-        Workstation,
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-        verbose_name="Рабочее место",
-    )
-    purchase_date = models.DateField(
-        null=True, blank=True, verbose_name="Дата приобретения"
-    )
-    warranty_expiry_date = models.DateField(
-        null=True, blank=True, verbose_name="Дата окончания гарантии"
-    )
-    status = models.CharField(
-        max_length=20,
-        choices=STATUS_CHOICES,
-        default="working",
-        verbose_name="Состояние",
-    )
+    serial_number = models.CharField(max_length=100, unique=True, verbose_name="Серийный номер")
+    inventory_number = models.CharField(max_length=100, blank=True, null=True, verbose_name="Инвентарный номер")
+    nomenclature_number = models.CharField(max_length=100, verbose_name="Номенклатурный номер")
+    person_in_charge = models.ForeignKey(PersonInCharge, on_delete=models.CASCADE, verbose_name="МОЛ")
+    warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE, verbose_name="Склад")
+    purchase_date = models.DateField(verbose_name="Дата приобретения")
+    warranty_expiry_date = models.DateField(verbose_name="Дата окончания гарантии")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='working', verbose_name="Состояние")
 
-    class Meta:
-        abstract = True
-
-
-class SystemUnit(Equipment):
-    cpu = models.CharField(
-        max_length=100, null=True, blank=True, verbose_name="Процессор"
-    )
-    ram = models.PositiveIntegerField(
-        null=True, blank=True, verbose_name="Оперативная память (ГБ)"
-    )
-    storage = models.PositiveIntegerField(
-        null=True, blank=True, verbose_name="Накопитель (ГБ)"
-    )
-
-    class Meta:
-        verbose_name = "Системный блок"
-        verbose_name_plural = "Системные блоки"
-
-
-class Monitor(Equipment):
-    resolution = models.CharField(
-        max_length=100, null=True, blank=True, verbose_name="Разрешение"
-    )
-    size = models.PositiveIntegerField(
-        null=True, blank=True, verbose_name="Диагональ (дюймы)"
-    )
-
+    def __str__(self):
+        return f'{self.model} ({self.serial_number})'
+    
     class Meta:
         verbose_name = "Монитор"
         verbose_name_plural = "Мониторы"
