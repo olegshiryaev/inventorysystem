@@ -1,4 +1,6 @@
 from django.db import models
+from django.dispatch import receiver
+from django.db.models.signals import pre_save
 
 
 class Warehouse(models.Model):
@@ -91,18 +93,62 @@ class Equipment(models.Model):
         ("disposal", "На утилизацию"),
         ("disposed", "Утилизировано"),
     ]
-    model = models.ForeignKey(EquipmentModel, on_delete=models.CASCADE, verbose_name="Модель оборудования")
+    model = models.ForeignKey(
+        EquipmentModel, on_delete=models.CASCADE, verbose_name="Модель оборудования"
+    )
     code = models.CharField(max_length=100, verbose_name="Код")
-    serial_number = models.CharField(max_length=100, unique=True, verbose_name="Серийный номер")
-    inventory_number = models.CharField(max_length=100, blank=True, null=True, verbose_name="Инвентарный номер")
-    person_in_charge = models.ForeignKey(PersonInCharge, on_delete=models.CASCADE, verbose_name="МОЛ")
-    warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE, verbose_name="Склад")
-    purchase_date = models.DateField(verbose_name="Дата приобретения")
-    warranty_expiry_date = models.DateField(verbose_name="Дата окончания гарантии")
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='working', verbose_name="Состояние")
+    serial_number = models.CharField(
+        max_length=100, unique=True, verbose_name="Серийный номер"
+    )
+    inventory_number = models.CharField(
+        max_length=100, blank=True, null=True, verbose_name="Инвентарный номер"
+    )
+    person_in_charge = models.ForeignKey(
+        PersonInCharge, on_delete=models.CASCADE, verbose_name="МОЛ"
+    )
+    warehouse = models.ForeignKey(
+        Warehouse, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Склад"
+    )
+    workstation = models.ForeignKey(
+        Workstation,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        verbose_name="Рабочее место",
+    )
+    purchase_date = models.DateField(
+        null=True, blank=True, verbose_name="Дата приобретения"
+    )
+    warranty_expiry_date = models.DateField(
+        null=True, blank=True, verbose_name="Дата окончания гарантии"
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="working",
+        verbose_name="Состояние",
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
 
     class Meta:
-        abstract = True
+        verbose_name = "Оборудование"
+        verbose_name_plural = "Оборудование"
+
+
+class EquipmentStatusHistory(models.Model):
+    equipment = models.ForeignKey(
+        "Equipment", on_delete=models.CASCADE, verbose_name="Оборудование"
+    )
+    status = models.CharField(
+        max_length=20, choices=Equipment.STATUS_CHOICES, verbose_name="Состояние"
+    )
+    change_date = models.DateTimeField(auto_now_add=True, verbose_name="Дата изменения")
+    comments = models.TextField(blank=True, verbose_name="Комментарии")
+
+    class Meta:
+        verbose_name = "История состояния оборудования"
+        verbose_name_plural = "История состояний оборудования"
 
 
 class SystemUnit(Equipment):
@@ -111,7 +157,7 @@ class SystemUnit(Equipment):
     storage = models.PositiveIntegerField(verbose_name="Накопитель (ГБ)")
 
     def __str__(self):
-        return f'Системный блок: {self.model}'
+        return f"Системный блок: {self.model}"
 
     class Meta:
         verbose_name = "Системный блок"
@@ -123,8 +169,30 @@ class Monitor(Equipment):
     size = models.PositiveIntegerField(verbose_name="Диагональ (дюймы)")
 
     def __str__(self):
-        return f'Монитор: {self.model}'
+        return f"Монитор: {self.model}"
 
     class Meta:
         verbose_name = "Монитор"
         verbose_name_plural = "Мониторы"
+
+
+# Сигнал для отслеживания изменения статуса
+@receiver(pre_save, sender=Equipment)
+def create_status_history(sender, instance, **kwargs):
+    if instance.pk:
+        previous = Equipment.objects.get(pk=instance.pk)
+        if previous.status != instance.status:
+            previous_status_display = previous.get_status_display()
+            new_status_display = instance.get_status_display()
+            EquipmentStatusHistory.objects.create(
+                equipment=instance,
+                status=instance.status,
+                comments=f"Статус изменен с {previous_status_display} на {new_status_display}",
+            )
+
+
+# Подключение сигнала к моделям-наследникам
+@receiver(pre_save, sender=SystemUnit)
+@receiver(pre_save, sender=Monitor)
+def create_status_history_submodels(sender, instance, **kwargs):
+    create_status_history(sender, instance, **kwargs)

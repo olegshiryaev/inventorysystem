@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Создать новое оборудование
+{% endblock %}
+
+{% block content %}
+    <h1 class="my-4">Выберите тип оборудования</h1>
+    <form method="get" action="{% url 'inventory:equipment_create' %}">
+        <div class="form-group">
+            <label for="equipmentType">Тип оборудования:</label>
+            <select name="equipment_type" id="equipmentType" class="form-control">
+                <option value="system_unit">Системный блок</option>
+                <option value="monitor">Монитор</option>
+                <option value="other">Другое оборудование</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Далее</button>
+    </form>
+    <a href="{% url 'inventory:equipment_list' %}" class="btn btn-secondary mt-3">Назад к списку</a>
+{% endblock %}

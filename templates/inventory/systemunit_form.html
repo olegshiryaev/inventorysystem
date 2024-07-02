@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+    Создание системного блока
+{% endblock %}
+
+{% block content %}
+    <h1 class="my-4">Создание нового системного блока</h1>
+    
+    <form method="post" enctype="multipart/form-data" id="systemUnitForm">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+    </form>
+
+    <!-- Кнопка для открытия модального окна добавления МОЛ -->
+    <button type="button" class="btn btn-secondary mt-3" data-bs-toggle="modal" data-bs-target="#addPersonInChargeModal">
+        Добавить нового МОЛ
+    </button>
+
+    <!-- Модальное окно для добавления нового МОЛ -->
+    <div class="modal fade" id="addPersonInChargeModal" tabindex="-1" aria-labelledby="addPersonInChargeModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addPersonInChargeModalLabel">Добавление нового МОЛ</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Форма для добавления нового МОЛ -->
+                    <form id="addPersonInChargeForm" method="post">
+                        {% csrf_token %}
+                        <!-- Поля формы -->
+                        <div class="form-group">
+                            <label for="id_name">Имя МОЛ:</label>
+                            <input type="text" id="id_name" name="name" class="form-control" required>
+                        </div>
+                        <!-- Кнопка для отправки формы -->
+                        <button type="submit" class="btn btn-primary">Добавить</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Кнопка для открытия модального окна добавления склада -->
+    <button type="button" class="btn btn-secondary mt-3" data-bs-toggle="modal" data-bs-target="#addWarehouseModal">
+        Добавить новый склад
+    </button>
+
+    <!-- Модальное окно для добавления нового склада -->
+    <div class="modal fade" id="addWarehouseModal" tabindex="-1" aria-labelledby="addWarehouseModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addWarehouseModalLabel">Добавление нового склада</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Форма для добавления нового склада -->
+                    <form id="addWarehouseForm" method="post">
+                        {% csrf_token %}
+                        <!-- Поля формы -->
+                        <div class="form-group">
+                            <label for="id_name">Название склада:</label>
+                            <input type="text" id="id_name" name="name" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="id_location">Адрес склада:</label>
+                            <input type="text" id="id_location" name="location" class="form-control" required>
+                        </div>
+                        <!-- Кнопка для отправки формы -->
+                        <button type="submit" class="btn btn-primary">Добавить</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function(){
+        // Инициализация datepicker
+        $('.datepicker').datepicker({
+            format: 'yyyy-mm-dd',
+            autoclose: true,
+            language: 'ru'  // Язык локализации
+        });
+    });
+
+    $(document).ready(function() {
+        // Отправка формы AJAX для добавления нового МОЛ
+        $('#addPersonInChargeForm').submit(function(e) {
+            e.preventDefault();
+            $.ajax({
+                type: 'POST',
+                url: '{% url "inventory:add_person_in_charge" %}',
+                data: $(this).serialize(),
+                success: function(response) {
+                    // Добавление нового МОЛ в список
+                    $('#id_person_in_charge').append(new Option(response.name, response.id));
+                    $('#id_person_in_charge').val(response.id);
+                    // Закрытие модального окна
+                    $('#addPersonInChargeModal').modal('hide');
+                },
+                error: function(response) {
+                    alert('Ошибка: ' + response.responseJSON.errors);
+                }
+            });
+        });
+
+        // Отправка формы AJAX для добавления нового склада
+        $('#addWarehouseForm').submit(function(e) {
+            e.preventDefault();
+            $.ajax({
+                type: 'POST',
+                url: '{% url "inventory:add_warehouse" %}',
+                data: $(this).serialize(),
+                success: function(response) {
+                    // Добавление нового склада в список
+                    $('#id_warehouse').append(new Option(response.name, response.id));
+                    $('#id_warehouse').val(response.id);
+                    // Закрытие модального окна
+                    $('#addWarehouseModal').modal('hide');
+                },
+                error: function(response) {
+                    alert('Ошибка: ' + response.responseJSON.errors);
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

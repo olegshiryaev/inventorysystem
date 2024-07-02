@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 
 {% block title %}
-    Информация об оборудовании
+    Информация о мониторе: {{ equipment.model }}
 {% endblock %}
 
 {% block content %}
-    <h1 class="my-4">Информация об оборудовании</h1>
+    <h1 class="my-4">Информация о мониторе: {{ equipment.model }}</h1>
     <div class="card">
         <div class="card-body">
             <p><strong>Модель:</strong> {{ equipment.model }}</p>
@@ -18,6 +18,8 @@
             <p><strong>Дата окончания гарантии:</strong> {% if equipment.warranty_expiry_date %}{{ equipment.warranty_expiry_date }}{% else %}-{% endif %}</p>
             <p><strong>Ответственное лицо:</strong> {{ equipment.person_in_charge }}</p>
             <p><strong>Склад:</strong> {% if equipment.warehouse %}{{ equipment.warehouse }}{% else %}-{% endif %}</p>
+            <p><strong>Разрешение:</strong> {{ equipment.resolution }}</p>
+            <p><strong>Диагональ (дюймы):</strong> {{ equipment.size }}</p>
         </div>
     </div>
     <div class="mt-3">
