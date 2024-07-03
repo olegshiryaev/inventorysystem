@@ -30,6 +30,16 @@
             $('#equipmentTable').DataTable();
         });
     </script>
+    <script>
+        $(document).ready(function(){
+            // Инициализация datepicker
+            $('.datepicker').datepicker({
+                format: 'yyyy-mm-dd',
+                autoclose: true,
+                language: 'ru'  // Язык локализации
+            });
+        });
+    </script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

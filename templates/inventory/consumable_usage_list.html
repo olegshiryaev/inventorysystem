@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Учет расходных материалов
+{% endblock %}
+
+{% block content %}
+    <h1>Учет расходных материалов</h1>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Расходный материал</th>
+                <th>Оборудование</th>
+                <th>Дата установки</th>
+                <th>Установил</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for usage in usage_list %}
+                <tr>
+                    <td>{{ usage.consumable }}</td>
+                    <td>{{ usage.equipment.model }}</td>
+                    <td>{{ usage.installation_date }}</td>
+                    <td>{{ usage.installed_by.get_full_name }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

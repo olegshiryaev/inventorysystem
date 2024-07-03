@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Оборудование, на котором числится {{ mol.get_full_name }}
+{% endblock %}
+
+{% block content %}
+    <h1 class="my-4">Оборудование, на котором числится {{ mol.get_full_name }}</h1>
+    <div class="card">
+        <div class="card-body">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Модель оборудования</th>
+                        <th>Серийный номер</th>
+                        <th>Инвентарный номер</th>
+                        <th>Состояние</th>
+                        <th>Дата приобретения</th>
+                        <th>Дата окончания гарантии</th>
+                        <th>Склад или Рабочее место</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for equipment in equipment_list %}
+                        <tr>
+                            <td>{{ equipment.model }}</td>
+                            <td>{{ equipment.serial_number }}</td>
+                            <td>{{ equipment.inventory_number }}</td>
+                            <td>{{ equipment.get_status_display }}</td>
+                            <td>{{ equipment.purchase_date }}</td>
+                            <td>{{ equipment.warranty_expiry_date }}</td>
+                            <td>
+                                {% if equipment.warehouse %}
+                                    Склад: {{ equipment.warehouse }}
+                                {% elif equipment.workstation %}
+                                    Рабочее место: {{ equipment.workstation.location }}
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

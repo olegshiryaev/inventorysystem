@@ -1,7 +1,8 @@
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Equipment, EquipmentModel, SystemUnit, Monitor
+from .models import ConsumableUsage, Equipment, EquipmentModel, SystemUnit, Monitor
 from .forms import (
+    ConsumableUsageForm,
     EquipmentForm,
     EquipmentModelForm,
     MonitorForm,
@@ -234,3 +235,19 @@ def add_warehouse(request):
             return JsonResponse({"errors": form.errors}, status=400)
     else:
         return JsonResponse({"error": "Invalid request"}, status=403)
+    
+
+def consumable_usage_list(request):
+    usage_list = ConsumableUsage.objects.all().order_by('-installation_date')
+    return render(request, 'inventory/consumable_usage_list.html', {'usage_list': usage_list})
+    
+
+def consumable_usage_create(request):
+    if request.method == 'POST':
+        form = ConsumableUsageForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('inventory:consumable_usage_list')
+    else:
+        form = ConsumableUsageForm()
+    return render(request, 'inventory/consumable_usage_form.html', {'form': form})

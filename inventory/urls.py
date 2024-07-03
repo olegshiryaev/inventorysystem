@@ -9,9 +9,9 @@ urlpatterns = [
     path("<int:pk>/", views.equipment_detail, name="equipment_detail"),
     path("systemunit/<int:pk>/", views.systemunit_detail, name="systemunit_detail"),
     path("monitor/<int:pk>/", views.monitor_detail, name="monitor_detail"),
-    path("equipment/create/", views.equipment_create, name="equipment_create"),
-    path("systemunit/create/", views.systemunit_create, name="systemunit_create"),
-    path("monitor/create/", views.monitor_create, name="monitor_create"),
+    path("create/", views.equipment_create, name="equipment_create"),
+    path("create/systemunit", views.systemunit_create, name="systemunit_create"),
+    path("create/monitor", views.monitor_create, name="monitor_create"),
     path(
         "equipment/create_generic/",
         views.equipment_create_generic,
@@ -37,4 +37,6 @@ urlpatterns = [
         "add_person_in_charge/", views.add_person_in_charge, name="add_person_in_charge"
     ),
     path("add_warehouse/", views.add_warehouse, name="add_warehouse"),
+    path('consumable_usage/', views.consumable_usage_list, name='consumable_usage_list'),
+    path('consumable_usage/add/', views.consumable_usage_create, name='consumable_usage_create'),
 ]

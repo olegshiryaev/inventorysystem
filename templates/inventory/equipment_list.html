@@ -33,7 +33,7 @@
                 <th>Состояние</th>
                 <th>Дата покупки</th>
                 <th>Дата окончания гарантии</th>
-                <th>Ответственное лицо</th>
+                <th>МОЛ</th>
                 <th>Склад</th>
                 <th>Действия</th>
             </tr>
@@ -46,12 +46,12 @@
                         {% else %}{% url 'inventory:equipment_detail' pk=equipment.pk %}{% endif %}">{{ equipment.serial_number }}</a></td>
                     <td>{{ equipment.model }}</td>
                     <td>{{ equipment.inventory_number|default_if_none:"" }}</td>
-                    <td>{{ equipment.nomenclature_number|default_if_none:"" }}</td>
+                    <td>{{ equipment.model.nomenclature_number|default_if_none:"" }}</td>
                     <td>{{ equipment.code }}</td>
                     <td>{{ equipment.get_status_display }}</td>
                     <td>{{ equipment.purchase_date|default_if_none:"" }}</td>
                     <td>{{ equipment.warranty_expiry_date|default_if_none:"" }}</td>
-                    <td>{{ equipment.person_in_charge|default_if_none:"" }}</td>
+                    <td>{{ equipment.person_in_charge.get_full_name|default_if_none:"" }}</td>
                     <td>{{ equipment.warehouse|default_if_none:"" }}</td>
                     <td>
                         <a href="{% url 'inventory:equipment_edit' pk=equipment.pk %}" class="btn btn-sm btn-warning">Редактировать</a>

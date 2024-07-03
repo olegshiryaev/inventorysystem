@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Оборудование на вашем рабочем месте
+{% endblock %}
+
+{% block content %}
+    <h1 class="my-4">Оборудование на вашем рабочем месте</h1>
+    
+    {% if workstation %}
+        <p><strong>Рабочее место:</strong> {{ workstation }}</p>
+        <p><strong>Пользователь:</strong> {{ user.get_full_name }}</p>
+    {% else %}
+        <p>Вы не привязаны к рабочему месту.</p>
+    {% endif %}
+
+    <ul>
+        {% for equipment in equipment_list %}
+            <li>
+                <p><strong>Модель:</strong> {{ equipment.model }}</p>
+                <p><strong>Серийный номер:</strong> {{ equipment.serial_number }}</p>
+                <p><strong>Код:</strong> {{ equipment.code }}</p>
+                <p><strong>Состояние:</strong> {{ equipment.get_status_display }}</p>
+                <!-- Добавьте другие необходимые поля оборудования -->
+            </li>
+        {% empty %}
+            <li>На вашем рабочем месте нет установленного оборудования.</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

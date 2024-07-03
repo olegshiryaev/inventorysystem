@@ -25,16 +25,33 @@ class CustomUserManager(BaseUserManager):
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True)
-    first_name = models.CharField(max_length=30, blank=True)
-    last_name = models.CharField(max_length=30, blank=True)
-    is_active = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=False)
-    date_joined = models.DateTimeField(default=timezone.now)
+    last_name = models.CharField(max_length=30, blank=True, verbose_name="Фамилия")
+    first_name = models.CharField(max_length=30, blank=True, verbose_name="Имя")
+    middle_name = models.CharField(max_length=30, blank=True, null=True, verbose_name="Отчество")
+    address = models.CharField(max_length=255, blank=True, null=True, verbose_name="Адрес")
+    position = models.CharField(max_length=100, blank=True, null=True, verbose_name="Должность")
+    department = models.CharField(max_length=100, blank=True, null=True, verbose_name="Отдел")
+    employee_number = models.CharField(max_length=100, blank=True, null=True, unique=True, verbose_name="Табельный номер")
+    phone = models.CharField(max_length=20, blank=True, null=True, verbose_name="Телефон")
+    supervisor = models.ForeignKey(
+        'self', on_delete=models.SET_NULL, null=True, blank=True, related_name='subordinates', verbose_name="Руководитель"
+    )
+    is_mol = models.BooleanField(default=False, verbose_name="Является МОЛом")
+    is_active = models.BooleanField(default=True, verbose_name="Аккаунт активен")
+    is_staff = models.BooleanField(default=False, verbose_name="Администратор")
+    date_joined = models.DateTimeField(default=timezone.now, verbose_name="Дата регистрации")
 
     objects = CustomUserManager()
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
+    def get_full_name(self):
+        return f"{self.last_name} {self.first_name} {self.middle_name}".strip()
+    
     def __str__(self):
-        return self.email
+        return f"{self.email}"
+    
+    class Meta:
+        verbose_name = "Пользователь"
+        verbose_name_plural = "Пользователи"

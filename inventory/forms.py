@@ -1,5 +1,7 @@
 from django import forms
 from .models import (
+    ConsumableStock,
+    ConsumableUsage,
     Equipment,
     EquipmentModel,
     Monitor,
@@ -9,6 +11,7 @@ from .models import (
 )
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
+from django.db import models
 
 
 class EquipmentModelForm(forms.ModelForm):
@@ -111,3 +114,29 @@ class WarehouseForm(forms.ModelForm):
     class Meta:
         model = Warehouse
         fields = ["name", "location"]
+
+
+class ConsumableUsageForm(forms.ModelForm):
+    class Meta:
+        model = ConsumableUsage
+        fields = ["consumable", "equipment", "warehouse", "installation_date", "installed_by"]
+        widgets = {
+            "installation_date": DateInput(attrs={"class": "datepicker"}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['equipment'].queryset = Equipment.objects.filter(
+            models.Q(printer__isnull=False) | models.Q(mfp__isnull=False)
+        )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        consumable = cleaned_data.get("consumable")
+        warehouse = cleaned_data.get("warehouse")
+
+        if consumable and warehouse:
+            stock = ConsumableStock.objects.filter(consumable=consumable, warehouse=warehouse).first()
+            if not stock or stock.quantity < 1:
+                raise forms.ValidationError("Нет достаточного количества расходных материалов на складе")
+        return cleaned_data

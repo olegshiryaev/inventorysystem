@@ -11,16 +11,41 @@
             <p><strong>Модель:</strong> {{ equipment.model }}</p>
             <p><strong>Серийный номер:</strong> {{ equipment.serial_number }}</p>
             <p><strong>Инвентарный номер:</strong> {% if equipment.inventory_number %}{{ equipment.inventory_number }}{% else %}-{% endif %}</p>
-            <p><strong>Номенклатурный номер:</strong> {% if equipment.nomenclature_number %}{{ equipment.nomenclature_number }}{% else %}-{% endif %}</p>
+            <p><strong>Номенклатурный номер:</strong> {% if equipment.model.nomenclature_number %}{{ equipment.model.nomenclature_number }}{% else %}-{% endif %}</p>
             <p><strong>Код:</strong> {{ equipment.code }}</p>
             <p><strong>Состояние:</strong> {{ equipment.get_status_display }}</p>
             <p><strong>Дата покупки:</strong> {% if equipment.purchase_date %}{{ equipment.purchase_date }}{% else %}-{% endif %}</p>
             <p><strong>Дата окончания гарантии:</strong> {% if equipment.warranty_expiry_date %}{{ equipment.warranty_expiry_date }}{% else %}-{% endif %}</p>
-            <p><strong>Ответственное лицо:</strong> {{ equipment.person_in_charge }}</p>
-            <p><strong>Склад:</strong> {% if equipment.warehouse %}{{ equipment.warehouse }}{% else %}-{% endif %}</p>
-            <p><strong>Процессор:</strong> {{ equipment.cpu }}</p>
-            <p><strong>Оперативная память (ГБ):</strong> {{ equipment.ram }}</p>
-            <p><strong>Накопитель (ГБ):</strong> {{ equipment.storage }}</p>
+            <p><strong>МОЛ:</strong> {{ equipment.person_in_charge }}</p>
+            {% if equipment.warehouse %}
+                <p><strong>Склад:</strong> {{ equipment.warehouse }}</p>
+            {% elif equipment.workstation %}
+                <p><strong>Пользователь:</strong> {{ equipment.workstation.get_user_full_name }}</p>
+                <p><strong>Адрес:</strong> {{ equipment.workstation.user.address }}</p>
+                <p><strong>Рабочее место:</strong> {{ equipment.workstation.location }}</p>
+            {% else %}
+                <p><strong>Местоположение:</strong> -</p>
+            {% endif %}
+            <p><strong>Процессор:</strong> {% if equipment.cpu %}{{ equipment.cpu }}{% else %}-{% endif %}</p>
+            <p><strong>Оперативная память (ГБ):</strong> 
+                {% if equipment.ram.exists %}
+                    {% for ram in equipment.ram.all %}
+                        {{ ram.size }} ГБ{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                {% else %}
+                    -
+                {% endif %}
+            </p>
+            <p><strong>Накопитель (ГБ):</strong> 
+                {% if equipment.storage.exists %}
+                    {% for storage in equipment.storage.all %}
+                        {{ storage.size }} ГБ{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                {% else %}
+                    -
+                {% endif %}
+            </p>
+            <p><strong>Операционная система:</strong> {% if equipment.os %}{{ equipment.os }}{% else %}-{% endif %}</p>
         </div>
     </div>
     <div class="mt-3">
