@@ -1,18 +1,30 @@
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import ConsumableUsage, Equipment, EquipmentModel, SystemUnit, Monitor
+from django.urls import reverse, reverse_lazy
+from .models import (
+    MFP,
+    ConsumableUsage,
+    Equipment,
+    EquipmentModel,
+    Printer,
+    SystemUnit,
+    Monitor,
+)
 from .forms import (
     ConsumableUsageForm,
     EquipmentForm,
     EquipmentModelForm,
+    MFPForm,
     MonitorForm,
     PersonInChargeForm,
+    PrinterForm,
     SystemUnitForm,
     WarehouseForm,
 )
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_protect
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
 
 def scan_barcode(request):
@@ -45,11 +57,17 @@ def equipment_list(request):
         equipments = SystemUnit.objects.all()
     elif type_param == "monitors":
         equipments = Monitor.objects.all()
+    elif type_param == "printers":
+        equipments = Printer.objects.all()
+    elif type_param == "mfps":
+        equipments = MFP.objects.all()
     else:
         # Отобразим все оборудование
         system_units = SystemUnit.objects.all()
         monitors = Monitor.objects.all()
-        equipments = list(system_units) + list(monitors)
+        printers = Printer.objects.all()
+        mfps = MFP.objects.all()
+        equipments = list(system_units) + list(monitors) + list(printers) + list(mfps)
 
     context = {
         "equipments": equipments,
@@ -61,104 +79,156 @@ def equipment_list(request):
 @login_required
 def equipment_detail(request, pk):
     equipment = get_object_or_404(Equipment, pk=pk)
-
-    if isinstance(equipment, SystemUnit):
-        template_name = "inventory/systemunit_detail.html"
-    elif isinstance(equipment, Monitor):
-        template_name = "inventory/monitor_detail.html"
+    equipment_type = equipment.get_equipment_type()
+    if equipment_type == "systemunit":
+        template = "inventory/systemunit_detail.html"
+    elif equipment_type == "monitor":
+        template = "inventory/monitor_detail.html"
+    elif equipment_type == "printer":
+        template = "inventory/printer_detail.html"
+    elif equipment_type == "mfp":
+        template = "inventory/mfp_detail.html"
     else:
-        template_name = "inventory/equipment_detail.html"
+        template = "inventory/equipment_detail.html"
 
-    return render(request, template_name, {"equipment": equipment})
-
-
-@login_required
-def systemunit_detail(request, pk):
-    systemunit = get_object_or_404(SystemUnit, pk=pk)
-    return render(
-        request, "inventory/systemunit_detail.html", {"equipment": systemunit}
-    )
+    return render(request, template, {"equipment": equipment})
 
 
-@login_required
-def monitor_detail(request, pk):
-    monitor = get_object_or_404(Monitor, pk=pk)
-    return render(request, "inventory/monitor_detail.html", {"equipment": monitor})
+# @login_required
+# def equipment_create(request):
+#     if request.method == "GET" and "equipment_type" in request.GET:
+#         equipment_type = request.GET["equipment_type"]
+#         if equipment_type == "system_unit":
+#             return redirect("inventory:systemunit_create")
+#         elif equipment_type == "monitor":
+#             return redirect("inventory:monitor_create")
+#         else:
+#             return redirect("inventory:equipment_create_generic")
+
+#     return render(request, "inventory/equipment_create.html")
 
 
-@login_required
-def equipment_create(request):
-    if request.method == "GET" and "equipment_type" in request.GET:
-        equipment_type = request.GET["equipment_type"]
-        if equipment_type == "system_unit":
-            return redirect("inventory:systemunit_create")
+# @login_required
+# def systemunit_create(request):
+#     if request.method == "POST":
+#         form = SystemUnitForm(request.POST)
+#         if form.is_valid():
+#             form.save()
+#             return redirect("inventory:equipment_list")
+#     else:
+#         form = SystemUnitForm()
+#     return render(request, "inventory/systemunit_form.html", {"form": form})
+
+
+# @login_required
+# def monitor_create(request):
+#     if request.method == "POST":
+#         form = MonitorForm(request.POST)
+#         if form.is_valid():
+#             form.save()
+#             return redirect("inventory:equipment_list")
+#     else:
+#         form = MonitorForm()
+#     return render(request, "inventory/monitor_form.html", {"form": form})
+
+
+# @login_required
+# def equipment_create_generic(request):
+#     if request.method == "POST":
+#         form = EquipmentForm(request.POST)
+#         if form.is_valid():
+#             form.save()
+#             return redirect("inventory:equipment_list")
+#     else:
+#         form = EquipmentForm()
+#     return render(request, "inventory/equipment_form.html", {"form": form})
+
+
+# @login_required
+# def equipment_edit(request, pk):
+#     equipment = get_object_or_404(Equipment, pk=pk)
+#     if request.method == "POST":
+#         form = EquipmentForm(request.POST, instance=equipment)
+#         if form.is_valid():
+#             equipment = form.save()
+#             return redirect("inventory:equipment_detail", pk=equipment.pk)
+#     else:
+#         form = EquipmentForm(instance=equipment)
+#     return render(
+#         request,
+#         "inventory/equipment_form.html",
+#         {"form": form, "title": "Редактировать оборудование"},
+#     )
+
+
+# @login_required
+# @require_POST
+# def equipment_delete(request, pk):
+#     equipment = get_object_or_404(Equipment, pk=pk)
+#     equipment.delete()
+#     return redirect("inventory:equipment_list")
+
+
+def choose_equipment_type(request):
+    if request.method == "POST":
+        selected_type = request.POST.get("type")
+        return redirect(
+            reverse("inventory:equipment_add", kwargs={"type": selected_type})
+        )
+
+    return render(request, "inventory/choose_equipment_type.html")
+
+
+class EquipmentCreateView(CreateView):
+    template_name = "inventory/equipment_form.html"
+    success_url = reverse_lazy("inventory:equipment_list")
+
+    def get_form_class(self):
+        equipment_type = self.kwargs.get("type")
+        if equipment_type == "systemunit":
+            return SystemUnitForm
         elif equipment_type == "monitor":
-            return redirect("inventory:monitor_create")
+            return MonitorForm
+        elif equipment_type == "printer":
+            return PrinterForm
+        elif equipment_type == "mfp":
+            return MFPForm
         else:
-            return redirect("inventory:equipment_create_generic")
-
-    return render(request, "inventory/equipment_create.html")
+            return EquipmentForm
 
 
-@login_required
-def systemunit_create(request):
-    if request.method == "POST":
-        form = SystemUnitForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect("inventory:equipment_list")
-    else:
-        form = SystemUnitForm()
-    return render(request, "inventory/systemunit_form.html", {"form": form})
+class EquipmentUpdateView(UpdateView):
+    model = Equipment
+    template_name = "inventory/equipment_form.html"
+    success_url = reverse_lazy("inventory:equipment_list")
+
+    def get_form_class(self):
+        if hasattr(self.object, "systemunit"):
+            return SystemUnitForm
+        elif hasattr(self.object, "monitor"):
+            return MonitorForm
+        elif hasattr(self.object, "printer"):
+            return PrinterForm
+        elif hasattr(self.object, "mfp"):
+            return MFPForm
 
 
-@login_required
-def monitor_create(request):
-    if request.method == "POST":
-        form = MonitorForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect("inventory:equipment_list")
-    else:
-        form = MonitorForm()
-    return render(request, "inventory/monitor_form.html", {"form": form})
+class EquipmentDeleteView(DeleteView):
+    model = Equipment
+    template_name = "inventory/equipment_confirm_delete.html"
+    success_url = reverse_lazy("inventory:equipment_list")
 
-
-@login_required
-def equipment_create_generic(request):
-    if request.method == "POST":
-        form = EquipmentForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect("inventory:equipment_list")
-    else:
-        form = EquipmentForm()
-    return render(request, "inventory/equipment_form.html", {"form": form})
-
-
-@login_required
-def equipment_edit(request, pk):
-    equipment = get_object_or_404(Equipment, pk=pk)
-    if request.method == "POST":
-        form = EquipmentForm(request.POST, instance=equipment)
-        if form.is_valid():
-            equipment = form.save()
-            return redirect("inventory:equipment_detail", pk=equipment.pk)
-    else:
-        form = EquipmentForm(instance=equipment)
-    return render(
-        request,
-        "inventory/equipment_form.html",
-        {"form": form, "title": "Редактировать оборудование"},
-    )
-
-
-@login_required
-@require_POST
-def equipment_delete(request, pk):
-    equipment = get_object_or_404(Equipment, pk=pk)
-    equipment.delete()
-    return redirect("inventory:equipment_list")
+    def get_object(self, queryset=None):
+        equipment = super().get_object(queryset)
+        if hasattr(equipment, "systemunit"):
+            return equipment.systemunit
+        elif hasattr(equipment, "monitor"):
+            return equipment.monitor
+        elif hasattr(equipment, "printer"):
+            return equipment.printer
+        elif hasattr(equipment, "mfp"):
+            return equipment.mfp
+        return equipment
 
 
 def equipment_model_list(request):
@@ -235,19 +305,21 @@ def add_warehouse(request):
             return JsonResponse({"errors": form.errors}, status=400)
     else:
         return JsonResponse({"error": "Invalid request"}, status=403)
-    
+
 
 def consumable_usage_list(request):
-    usage_list = ConsumableUsage.objects.all().order_by('-installation_date')
-    return render(request, 'inventory/consumable_usage_list.html', {'usage_list': usage_list})
-    
+    usage_list = ConsumableUsage.objects.all().order_by("-installation_date")
+    return render(
+        request, "inventory/consumable_usage_list.html", {"usage_list": usage_list}
+    )
+
 
 def consumable_usage_create(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         form = ConsumableUsageForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('inventory:consumable_usage_list')
+            return redirect("inventory:consumable_usage_list")
     else:
         form = ConsumableUsageForm()
-    return render(request, 'inventory/consumable_usage_form.html', {'form': form})
+    return render(request, "inventory/consumable_usage_form.html", {"form": form})

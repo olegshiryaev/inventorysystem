@@ -1,11 +1,13 @@
 from django import forms
 from .models import (
+    MFP,
     ConsumableStock,
     ConsumableUsage,
     Equipment,
     EquipmentModel,
     Monitor,
     PersonInCharge,
+    Printer,
     SystemUnit,
     Warehouse,
 )
@@ -21,62 +23,47 @@ class EquipmentModelForm(forms.ModelForm):
 
 
 class DateInput(forms.DateInput):
-    input_type = "text"
+    input_type = "date"
 
 
 class SystemUnitForm(forms.ModelForm):
     class Meta:
         model = SystemUnit
-        fields = [
-            "model",
-            "serial_number",
-            "inventory_number",
-            "person_in_charge",
-            "warehouse",
-            "purchase_date",
-            "warranty_expiry_date",
-            "status",
-            "cpu",
-            "ram",
-            "storage",
-        ]
+        fields = "__all__"
         widgets = {
             "purchase_date": DateInput(attrs={"class": "datepicker"}),
             "warranty_expiry_date": DateInput(attrs={"class": "datepicker"}),
         }
-
-    def __init__(self, *args, **kwargs):
-        super(SystemUnitForm, self).__init__(*args, **kwargs)
-        self.helper = FormHelper()
-        self.helper.form_method = "post"
-        self.helper.add_input(Submit("submit", "Сохранить"))
 
 
 class MonitorForm(forms.ModelForm):
     class Meta:
         model = Monitor
-        fields = [
-            "model",
-            "serial_number",
-            "inventory_number",
-            "person_in_charge",
-            "warehouse",
-            "purchase_date",
-            "warranty_expiry_date",
-            "status",
-            "resolution",
-            "size",
-        ]
+        fields = "__all__"
         widgets = {
             "purchase_date": DateInput(attrs={"class": "datepicker"}),
             "warranty_expiry_date": DateInput(attrs={"class": "datepicker"}),
         }
 
-    def __init__(self, *args, **kwargs):
-        super(MonitorForm, self).__init__(*args, **kwargs)
-        self.helper = FormHelper()
-        self.helper.form_method = "post"
-        self.helper.add_input(Submit("submit", "Сохранить"))
+
+class PrinterForm(forms.ModelForm):
+    class Meta:
+        model = Printer
+        fields = "__all__"
+        widgets = {
+            "purchase_date": DateInput(attrs={"class": "datepicker"}),
+            "warranty_expiry_date": DateInput(attrs={"class": "datepicker"}),
+        }
+
+
+class MFPForm(forms.ModelForm):
+    class Meta:
+        model = MFP
+        fields = "__all__"
+        widgets = {
+            "purchase_date": DateInput(attrs={"class": "datepicker"}),
+            "warranty_expiry_date": DateInput(attrs={"class": "datepicker"}),
+        }
 
 
 class EquipmentForm(forms.ModelForm):
@@ -119,14 +106,20 @@ class WarehouseForm(forms.ModelForm):
 class ConsumableUsageForm(forms.ModelForm):
     class Meta:
         model = ConsumableUsage
-        fields = ["consumable", "equipment", "warehouse", "installation_date", "installed_by"]
+        fields = [
+            "consumable",
+            "equipment",
+            "warehouse",
+            "installation_date",
+            "installed_by",
+        ]
         widgets = {
             "installation_date": DateInput(attrs={"class": "datepicker"}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['equipment'].queryset = Equipment.objects.filter(
+        self.fields["equipment"].queryset = Equipment.objects.filter(
             models.Q(printer__isnull=False) | models.Q(mfp__isnull=False)
         )
 
@@ -136,7 +129,11 @@ class ConsumableUsageForm(forms.ModelForm):
         warehouse = cleaned_data.get("warehouse")
 
         if consumable and warehouse:
-            stock = ConsumableStock.objects.filter(consumable=consumable, warehouse=warehouse).first()
+            stock = ConsumableStock.objects.filter(
+                consumable=consumable, warehouse=warehouse
+            ).first()
             if not stock or stock.quantity < 1:
-                raise forms.ValidationError("Нет достаточного количества расходных материалов на складе")
+                raise forms.ValidationError(
+                    "Нет достаточного количества расходных материалов на складе"
+                )
         return cleaned_data

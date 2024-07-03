@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Информация о принтере: {{ equipment.model }}
+{% endblock %}
+
+{% block content %}
+    <h1 class="my-4">Информация о принтере: {{ equipment.model }}</h1>
+    <div class="card">
+        <div class="card-body">
+            <p><strong>Модель:</strong> {{ equipment.model }}</p>
+            <p><strong>Серийный номер:</strong> {{ equipment.serial_number }}</p>
+            <p><strong>Инвентарный номер:</strong> {% if equipment.inventory_number %}{{ equipment.inventory_number }}{% else %}-{% endif %}</p>
+            <p><strong>Номенклатурный номер:</strong> {% if equipment.model.nomenclature_number %}{{ equipment.model.nomenclature_number }}{% else %}-{% endif %}</p>
+            <p><strong>Код:</strong> {{ equipment.code }}</p>
+            <p><strong>Состояние:</strong> {{ equipment.get_status_display }}</p>
+            <p><strong>Дата покупки:</strong> {% if equipment.purchase_date %}{{ equipment.purchase_date }}{% else %}-{% endif %}</p>
+            <p><strong>Дата окончания гарантии:</strong> {% if equipment.warranty_expiry_date %}{{ equipment.warranty_expiry_date }}{% else %}-{% endif %}</p>
+            <p><strong>МОЛ:</strong> {{ equipment.person_in_charge }}</p>
+            {% if equipment.warehouse %}
+                <p><strong>Склад:</strong> {{ equipment.warehouse }}</p>
+            {% elif equipment.workstation %}
+                <p><strong>Пользователь:</strong> {{ equipment.workstation.get_user_full_name }}</p>
+                <p><strong>Адрес:</strong> {{ equipment.workstation.user.address }}</p>
+                <p><strong>Рабочее место:</strong> {{ equipment.workstation.location }}</p>
+            {% else %}
+                <p><strong>Местоположение:</strong> -</p>
+            {% endif %}
+        </div>
+    </div>
+    <div class="mt-3">
+        <a href="{% url 'inventory:equipment_edit' pk=equipment.pk %}" class="btn btn-warning">Редактировать</a>
+        <form action="{% url 'inventory:equipment_delete' pk=equipment.pk %}" method="post" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Удалить</button>
+        </form>
+        <a href="{% url 'inventory:equipment_list' %}" class="btn btn-secondary">Назад к списку</a>
+    </div>
+{% endblock %}

@@ -15,11 +15,13 @@
                 <option value="all" {% if selected_type == 'all' %}selected{% endif %}>Все</option>
                 <option value="system_units" {% if selected_type == 'system_units' %}selected{% endif %}>Системные блоки</option>
                 <option value="monitors" {% if selected_type == 'monitors' %}selected{% endif %}>Мониторы</option>
+                <option value="printers" {% if selected_type == "printers" %}selected{% endif %}>Принтеры</option>
+                <option value="mfps" {% if selected_type == "mfps" %}selected{% endif %}>МФУ</option>
             </select>
         </div>
     </form>
 
-    <a href="{% url 'inventory:equipment_create' %}" class="btn btn-success mb-3">Создать новое оборудование</a>
+    <a href="{% url 'inventory:choose_equipment_type' %}" class="btn btn-success mb-3">Создать новое оборудование</a>
     
     <!-- Таблица с оборудованием -->
     <table id="equipmentTable" class="table table-striped table-bordered">
@@ -41,9 +43,7 @@
         <tbody>
             {% for equipment in equipments %}
                 <tr>
-                    <td><a href="{% if equipment.systemunit %}{% url 'inventory:systemunit_detail' pk=equipment.pk %}
-                        {% elif equipment.monitor %}{% url 'inventory:monitor_detail' pk=equipment.pk %}
-                        {% else %}{% url 'inventory:equipment_detail' pk=equipment.pk %}{% endif %}">{{ equipment.serial_number }}</a></td>
+                    <td><a href="{% url 'inventory:equipment_detail' pk=equipment.pk %}">{{ equipment.serial_number }}</a></td>
                     <td>{{ equipment.model }}</td>
                     <td>{{ equipment.inventory_number|default_if_none:"" }}</td>
                     <td>{{ equipment.model.nomenclature_number|default_if_none:"" }}</td>
