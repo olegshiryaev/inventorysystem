@@ -202,15 +202,29 @@ class EquipmentUpdateView(UpdateView):
     template_name = "inventory/equipment_form.html"
     success_url = reverse_lazy("inventory:equipment_list")
 
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        if hasattr(obj, "systemunit"):
+            return obj.systemunit
+        elif hasattr(obj, "monitor"):
+            return obj.monitor
+        elif hasattr(obj, "printer"):
+            return obj.printer
+        elif hasattr(obj, "mfp"):
+            return obj.mfp
+        return obj
+
     def get_form_class(self):
-        if hasattr(self.object, "systemunit"):
+        obj = self.get_object()
+        if isinstance(obj, SystemUnit):
             return SystemUnitForm
-        elif hasattr(self.object, "monitor"):
+        elif isinstance(obj, Monitor):
             return MonitorForm
-        elif hasattr(self.object, "printer"):
+        elif isinstance(obj, Printer):
             return PrinterForm
-        elif hasattr(self.object, "mfp"):
+        elif isinstance(obj, MFP):
             return MFPForm
+        return EquipmentForm
 
 
 class EquipmentDeleteView(DeleteView):

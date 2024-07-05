@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% load crispy_forms_tags %}
+
 {% block title %}
 
 {% endblock %}
@@ -17,9 +19,9 @@
     </div>
 {% endif %}
   <h2>{% if form.instance.pk %}Редактировать{% else %}Добавить{% endif %} оборудование</h2>
-  <form method="post">
+  <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
-    {{ form.as_p }}
+    {{ form|crispy }}
     <button type="submit" class="btn btn-primary">{% if form.instance.pk %}Сохранить{% else %}Добавить{% endif %}</button>
   </form>
   <a href="{% url 'inventory:equipment_list' %}">Назад к списку оборудования</a>

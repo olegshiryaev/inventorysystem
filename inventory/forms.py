@@ -31,8 +31,8 @@ class SystemUnitForm(forms.ModelForm):
         model = SystemUnit
         fields = "__all__"
         widgets = {
-            "purchase_date": DateInput(attrs={"class": "datepicker"}),
-            "warranty_expiry_date": DateInput(attrs={"class": "datepicker"}),
+            "purchase_date": DateInput(format=('%Y-%m-%d'), attrs={"class": "datepicker"}),
+            "warranty_expiry_date": DateInput(format=('%Y-%m-%d'), attrs={"class": "datepicker"}),
         }
 
 
@@ -41,8 +41,8 @@ class MonitorForm(forms.ModelForm):
         model = Monitor
         fields = "__all__"
         widgets = {
-            "purchase_date": DateInput(attrs={"class": "datepicker"}),
-            "warranty_expiry_date": DateInput(attrs={"class": "datepicker"}),
+            "purchase_date": DateInput(format=('%Y-%m-%d'), attrs={"class": "datepicker"}),
+            "warranty_expiry_date": DateInput(format=('%Y-%m-%d'), attrs={"class": "datepicker"}),
         }
 
 
@@ -51,8 +51,8 @@ class PrinterForm(forms.ModelForm):
         model = Printer
         fields = "__all__"
         widgets = {
-            "purchase_date": DateInput(attrs={"class": "datepicker"}),
-            "warranty_expiry_date": DateInput(attrs={"class": "datepicker"}),
+            "purchase_date": DateInput(format=('%Y-%m-%d'), attrs={"class": "datepicker"}),
+            "warranty_expiry_date": DateInput(format=('%Y-%m-%d'), attrs={"class": "datepicker"}),
         }
 
 
@@ -61,10 +61,9 @@ class MFPForm(forms.ModelForm):
         model = MFP
         fields = "__all__"
         widgets = {
-            "purchase_date": DateInput(attrs={"class": "datepicker"}),
-            "warranty_expiry_date": DateInput(attrs={"class": "datepicker"}),
+            "purchase_date": DateInput(format=('%Y-%m-%d'), attrs={"class": "datepicker"}),
+            "warranty_expiry_date": DateInput(format=('%Y-%m-%d'), attrs={"class": "datepicker"}),
         }
-
 
 class EquipmentForm(forms.ModelForm):
     class Meta:
